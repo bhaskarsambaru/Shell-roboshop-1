@@ -5,7 +5,7 @@ instance_type="t3.micro"
 domain_name="chiguruorganics.store"
 hosted_zone_id="Z00706201JH1HRHD8M1KR"
 
-for instane in "$@"
+for instance in "$@"
 do
   echo "creating instance: $instance"
   instance_id=$(aws ec2 run-instances \
@@ -13,7 +13,7 @@ do
     --instance-type t3.micro \
     --security-groups "roboshop-common" "roboshop-$instance" \
 	--tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=roboshop-$instance}]' \
-	--query 'Instance [0].Instance id' \
+	--query 'Instance[0].Instance id' \
 	--output text
     )
 
@@ -26,35 +26,23 @@ do
             )
 
     r53_record="${instance}.${domain_name}"
-    else  
-        ip=$( aws ec2 describe-instance \
-            --instance-ids $instance_id \
-            --query 'Reservations[].Instance[].PublicIpAddress' \
-            --output text
-            )  
-    r53_record="${domain_name}"
-    fi
 
-    #update R53 Record
-
-    echo "Record:${r53_record}"
-    aws route53 change-resource-record-sets \
-        --hosted-zone-id $hosted_zone_id \
-        --change-batch '{
-            "changes": [
-                 {
-                  "Action: "UPSERT"
-                  "ResourceRecordset": {
-                  "name": "'$r53_record'",
-                  "type": "A",
-                  "TTL": 1,
-                  "ResourceRecords": [{"value": "'$IP'"}]
-                  }
+aws route53 change-resource-record-sets \
+    --hosted-zone-id "$hosted_zone_id" \
+    --change-batch "{
+        \"Changes\": [
+            {
+                \"Action\": \"UPSERT\",
+                \"ResourceRecordSet\": {
+                    \"Name\": \"$r53_record\",
+                    \"Type\": \"A\",
+                    \"TTL\": 60,
+                    \"ResourceRecords\": [
+                        {\"Value\": \"$ip\"}
+                    ]
                 }
-            ]
-           }'
-    echo "updated r53 record for $instance"
+            }
+        ]
+    }"
 
-  done
-
-  #THE END
+    ##THE
