@@ -9,8 +9,8 @@ domain_name="chiguruorganics.store"
 hosted_zone_id="Z00706201JH1HRHD8M1KR"
 
 # Enter your existing security group IDs
-common_sg_id="sg-REPLACE_COMMON"
-mongodb_sg_id="sg-REPLACE_MONGODB"
+common_sg_id="sg-01896a2fd41137344"
+mongodb_sg_id="sg-0c2f2da675071199d"
 
 for instance in "$@"
 do
